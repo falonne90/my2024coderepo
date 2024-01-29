@@ -1,0 +1,131 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: >-
+  This template creates an Amazon RDS DB instance. 
+
+Parameters:
+  DBName:
+    Description: name of my  database 
+    Type: String
+    MinLength: '1'
+    MaxLength: '64'
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: must begin with a letter and contain only alphanumeric characters.
+    Default: proDB
+  
+  DBInstanceClass:
+    Description: The database instance type of my App database
+    Type: String
+    Default: db.t2.micro # add or change the type if necessary
+ 
+  DBAllocatedStorage:
+    Description: The size of the database (Gb)
+    Type: Number
+    MinValue: '5'
+    MaxValue: '1024'
+    ConstraintDescription: must be between 20 and 1024Gb.
+    Default: 90
+  StorageType:
+    Description: The type of storage
+    Type: String
+    Default: gp2
+    AllowedValues: [gp2, io1]
+    ConstraintDescription: must be a valid storage type.
+
+  MasterUsername:
+    Description: The database admin account username
+    Type: String
+    Default: admin
+    MinLength: '1'
+    MaxLength: '16'
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: must begin with a letter and contain only alphanumeric characters.
+    NoEcho: true
+    AllowedValues:
+      - admin
+
+  MasterUserPassword:
+    Description: The database admin account password
+    Type: String
+    NoEcho: true
+    Default: 31Admin12
+    MinLength: '1'
+    MaxLength: '41'
+    AllowedPattern: '[a-zA-Z0-9]+'
+    ConstraintDescription: must contain only alphanumeric characters.
+  
+  DBEngineVersion:
+    Description: The database engine version
+    Type: String
+    Default: 8.0.28
+  
+  MultiAZ:
+    Description: Multi AZ
+    Type: String
+    Default: true
+    AllowedValues: [true, false]
+    ConstraintDescription: multi AZ must be true or false.
+
+Resources:
+  DBSubnetGroup:
+    Type: 'AWS::RDS::DBSubnetGroup'
+    Properties:
+      DBSubnetGroupDescription: Subnet group for the database
+      SubnetIds:
+        - !ImportValue pro-stack-PrivateSubnet1
+        - !ImportValue pro-stack-PrivateSubnet2
+      Tags:
+        - Key: Name
+          Value: DBSubnetGroup
+      
+  
+  MyDB:
+    Type: 'AWS::RDS::DBInstance'
+    Properties:
+      DBName: !Ref DBName
+      DBInstanceClass: !Ref DBInstanceClass
+      AllocatedStorage: !Ref DBAllocatedStorage
+      Engine: MySQL
+      EngineVersion: !Ref DBEngineVersion
+      MasterUsername: !Ref MasterUsername
+      MasterUserPassword: !Ref MasterUserPassword
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      StorageType: !Ref StorageType
+      MultiAZ: !Ref MultiAZ
+      Tags:
+        - Key: Name
+          Value: !Ref DBName
+      DeletionProtection: false
+      
+      VPCSecurityGroups:
+        - !Ref DBSecurityGroups
+      PubliclyAccessible: false
+
+  DBSecurityGroups:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow access to MySQL port
+      VpcId: !ImportValue pro-stack-VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '3306'
+          ToPort: '3306'
+          SourceSecurityGroupId: !ImportValue app-stack-pro-securitygroups
+      Tags:
+        - Key: Name
+          Value: DBSecurityGroups
+
+  MyReadReplica:
+    Type: AWS::RDS::DBInstance
+    DependsOn: MyDB
+    Properties:
+      SourceDBInstanceIdentifier: !Ref MyDB
+      DBInstanceClass: !Ref DBInstanceClass
+      DBInstanceIdentifier: !Sub ${DBName}-replica
+      PubliclyAccessible: false
+      Tags:
+        - Key: Name
+          Value: MyReadReplica
+
+    
+
