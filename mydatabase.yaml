@@ -65,11 +65,11 @@ Parameters:
     Default: true
     AllowedValues: [true, false]
     ConstraintDescription: multi AZ must be true or false.
-  TimeoutInMinutes:
-    Description: Timeout in minutes for stack creation.
-    Type: Number
-    Default: 120
-    ConstraintDescription: must be between 1 and 180.
+  # TimeoutInMinutes:
+  #   Description: Timeout in minutes for stack creation.
+  #   Type: Number
+  #   Default: 120
+  #   ConstraintDescription: must be between 1 and 180.
     
 Resources:
   DBSubnetGroup:
