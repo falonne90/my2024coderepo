@@ -18,15 +18,15 @@ pipeline {
         SSM_TEMPLATE_FILE = 'myssm.yaml'
     }
 
-    stages {
-        stage('Validate template') {
-            steps {
-                script {
-                    // Install cfn-lint
-                    sh 'pip install cfn-lint'
-                }
-            }
-        }
+    // stages {
+    //     stage('Validate template') {
+    //         steps {
+    //             script {
+    //                 // Install cfn-lint
+    //                 sh 'pip install cfn-lint'
+    //             }
+    //         }
+    //     }
 
         // stage('Checkout code') {
         //     steps {
