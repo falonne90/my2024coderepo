@@ -103,12 +103,13 @@
 pipeline {
     agent any
 
-    parameters {
-        string(name: 'BRANCH', defaultValue: 'master', description: 'Git branch to deploy')
-        string(name: 'REGION', defaultValue: 'us-east-1', description: 'AWS Region')
-    }
+    // parameters {
+    //     string(name: 'BRANCH', defaultValue: 'master', description: 'Git branch to deploy')
+    //     string(name: 'REGION', defaultValue: 'us-east-1', description: 'AWS Region')
+    // }
   
     environment {
+        REGION = 'us-east-1'
         NETWORK_STACK_NAME = 'pro-stack'
         WEB_APP_STACK_NAME = 'app-stack'
         DATABASE_STACK_NAME = 'db-stack'
@@ -138,10 +139,10 @@ pipeline {
             steps {
                 script {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'newjenkins-user', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-                        sh "aws cloudformation deploy --stack-name $NETWORK_STACK_NAME --template-file $NETWORK_TEMPLATE_FILE --region us-east-1"
-                        sh "aws cloudformation deploy --stack-name $WEB_APP_STACK_NAME --template-file $WEB_APP_TEMPLATE_FILE --region us-east-1"
-                        sh "aws cloudformation deploy --stack-name $SSM_STACK_NAME --template-file $SSM_TEMPLATE_FILE --capabilities CAPABILITY_IAM --region us-east-1"
-                        sh "aws cloudformation deploy --stack-name $DATABASE_STACK_NAME --template-file $DATABASE_TEMPLATE_FILE --region us-east-1"
+                        sh "aws cloudformation deploy --stack-name $NETWORK_STACK_NAME --template-file $NETWORK_TEMPLATE_FILE --region $REGION"
+                        sh "aws cloudformation deploy --stack-name $WEB_APP_STACK_NAME --template-file $WEB_APP_TEMPLATE_FILE --region $REGION"
+                        sh "aws cloudformation deploy --stack-name $SSM_STACK_NAME --template-file $SSM_TEMPLATE_FILE --capabilities CAPABILITY_IAM --region $REGION"
+                        sh "aws cloudformation deploy --stack-name $DATABASE_STACK_NAME --template-file $DATABASE_TEMPLATE_FILE --region $REGION"
                     }
                 }
             }
