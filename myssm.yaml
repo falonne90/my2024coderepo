@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: >-
+  This CloudFormation template creates an ssm role to acces my database.
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: Provides Session Manager access without an Internet Gateway to an instance in a private subnet.
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Configuration
+        Parameters:
+          - LatestAmiId
+          - InstanceType
+    ParameterLabels:
+      LatestAmiId:
+        default: Systems Manager Parameter for AMI
+      InstanceType:
+        default: EC2 Instance Type
+Parameters:
+  # Systems Manager Parameter is used to find the latest Amazon Linux 2 AMI ID
+  # Amazon Linux 2 is preloaded with the SSM Agent
+  LatestAmiId:
+    Description: Region specific image from the Parameter Store
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+
+  InstanceType:
+    Type: String
+    Default: t2.micro
+    Description: Select a valid instance type for your Region
+    AllowedValues:
+    # add instance types to this list as desired
+    - t2.micro
+    - t3.micro
+    - m4.large
+    - m5.large
+
+Resources:
+  EC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+        - !Ref EC2InstanceSSMRole
+  EC2InstanceSSMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        # The managed IAM policy AmazonSSMManagedInstanceCore grants access to Session Manager
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore
+
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref EC2InstanceProfile
+      SubnetId: !ImportValue pro-stack-PrivateSubnet1
+      SecurityGroupIds:
+        - !ImportValue app-stack-pro-securitygroups # if not working, add the sg of the  SecurityGroupEc2Instance below
+
+      Tags:
+        - Key: Name
+          Value: SSM-SessionManager-Instance
+      UserData:
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash
+            yum update -y httpd
+            systemctl enable amazon-ssm-agent
+            systemctl start amazon-ssm-agent
+
+  SecurityGroupEc2Instance:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SG for EC2 Instance
+      VpcId: !ImportValue pro-stack-VPC
+        # Allow outbound HTTP to the internet for Session Manager
+      SecurityGroupEgress:
+        # The SSM Agent connects to Session Manager over TCP 443
+        - Description: Allow outbound HTTPS to the internet
+          CidrIp: 0.0.0.0/0
+          FromPort: 443
+          ToPort: 443
+          IpProtocol: tcp
