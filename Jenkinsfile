@@ -5,7 +5,7 @@ pipeline {
         string(name: 'BRANCH', defaultValue: 'master', description: 'Git branch to deploy')
         string(name: 'REGION', defaultValue: 'us-east-1', description: 'AWS Region')
     }
-
+  
     environment {
         AWS_REGION = 'params.REGION'
         NETWORK_STACK_NAME = 'pro-stack'
@@ -17,6 +17,7 @@ pipeline {
         DATABASE_TEMPLATE_FILE = 'mydatabase.yaml'
         SSM_TEMPLATE_FILE = 'myssm.yaml'
     }
+
 
     stages {
     //     stage('Validate template') {
@@ -60,7 +61,7 @@ pipeline {
         }
     }
 
-
+}
 
 
 
