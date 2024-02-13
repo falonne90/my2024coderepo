@@ -128,12 +128,11 @@ pipeline {
         //         }
         //     }
         // }
-
-        stage('Checkout code') {
-            steps {
-                checkout([$class: 'Git', branches: [[name: params.BRANCH]], userRemoteConfigs: [[url: 'https://github.com/falonne90/my2024coderepo']]])
-            }
-        }
+        // stage('Checkout code') {
+        //     steps {
+        //         checkout([$class: 'Git', branches: [[name: params.BRANCH]], userRemoteConfigs: [[url: 'https://github.com/falonne90/my2024coderepo']]])
+        //     }
+        // }
 
         stage('Deploy CloudFormation') {
             steps {
