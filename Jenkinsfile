@@ -28,14 +28,14 @@ pipeline {
             }
         }
 
-        stage('Checkout code') {
-            steps {
-                checkout([
-                    branch: params.BRANCH,
-                    scm: [$class: 'Git', url: 'https://github.com/falonne90/my2024coderepo']
-                ])
-            }
-        }
+        // stage('Checkout code') {
+        //     steps {
+        //         checkout([
+        //             branch: params.BRANCH,
+        //             scm: [$class: 'Git', url: 'https://github.com/falonne90/my2024coderepo']
+        //         ])
+        //     }
+        // }
 
         stage('Deploy CloudFormation') {
             steps {
