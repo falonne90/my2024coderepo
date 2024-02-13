@@ -120,14 +120,14 @@ pipeline {
     }
 
     stages {
-        stage('Validate template') {
-            steps {
-                script {
-                    echo 'Installing cfn-lint...'
-                    sh 'pip install cfn-lint'
-                }
-            }
-        }
+        // stage('Validate template') {
+        //     steps {
+        //         script {
+        //             echo 'Installing cfn-lint...'
+        //             sh 'pip install cfn-lint'
+        //         }
+        //     }
+        // }
 
         stage('Checkout code') {
             steps {
