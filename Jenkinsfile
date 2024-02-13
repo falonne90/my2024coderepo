@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        AWS_REGION = params.REGION
+        AWS_REGION = 'params.REGION'
         NETWORK_STACK_NAME = 'pro-stack'
         WEB_APP_STACK_NAME = 'app-stack'
         DATABASE_STACK_NAME = 'db-stack'
