@@ -59,7 +59,8 @@ pipeline {
             echo 'Falonne, check your template. Deployment failed.'
         }
     }
-}
+
+
 
 
 // #Remember to add pre-build, build and artifacts 
