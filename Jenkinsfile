@@ -16,10 +16,41 @@ pipeline {
         WEB_APP_TEMPLATE_FILE = 'mywebapp-elbcode.yaml'
         DATABASE_TEMPLATE_FILE = 'mydatabase.yaml'
         SSM_TEMPLATE_FILE = 'myssm.yaml'
+
+        PYTHON_HOME = tool 'Python3' // Assuming you have a Python tool configured
+        PATH = "${PYTHON_HOME}/bin:${env.PATH}"
+        AWS_CLI_HOME = tool 'AWS_CLI' // Assuming you have a tool configured for AWS CLI
+        PATH = "${AWS_CLI_HOME}:${env.PATH}"
     }
 
-
     stages {
+        stage('Install AWS CLI') {
+            steps {
+                script {
+                    echo 'Installing AWS CLI...'
+                    sh 'pip install awscli --upgrade --user'
+                }
+            }
+        }
+
+        stage('Validate template') {
+            steps {
+                script {
+                    echo 'Installing cfn-lint...'
+                    sh 'pip install cfn-lint'
+                }
+            }
+        }
+
+        stage('Checkout code') {
+            steps {
+                checkout([
+                    branch: params.BRANCH,
+                    scm: [$class: 'Git', url: 'https://github.com/falonne90/my2024coderepo']
+                ])
+            }
+        }
+
     //     stage('Validate template') {
     //         steps {
     //             script {
