@@ -18,7 +18,7 @@ pipeline {
         SSM_TEMPLATE_FILE = 'myssm.yaml'
     }
 
-    // stages {
+    stages {
     //     stage('Validate template') {
     //         steps {
     //             script {
@@ -59,6 +59,7 @@ pipeline {
             echo 'Falonne, check your template. Deployment failed.'
         }
     }
+
 
 
 
